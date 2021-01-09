@@ -1,12 +1,7 @@
+import { ProductList } from "./components/Products";
 
 function App() {
-  return (
-    <div
-        >
-          Voting App
-        
-    </div>
-  );
+  return <ProductList />;
 }
 
-export default App; 
+export default App;
