@@ -1,1 +1,1 @@
-A voting application using React - a suitable project for begineers
+A voting application using React - a suitable project for beginners
