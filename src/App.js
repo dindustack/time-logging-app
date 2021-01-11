@@ -1,7 +1,10 @@
-import { ProductList } from "./components/Products";
 
 function App() {
-  return <ProductList />;
+  return(
+    <div>
+      Hello World
+    </div>
+  )
 }
 
 export default App;
