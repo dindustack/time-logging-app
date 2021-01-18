@@ -1,9 +1,8 @@
+import TimersDashboard from "./components/TimersDashboard";
 
 function App() {
   return(
-    <div>
-      Hello World
-    </div>
+    <TimersDashboard />
   )
 }
 
