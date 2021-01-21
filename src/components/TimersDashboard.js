@@ -1,6 +1,35 @@
 import React from "react";
+import { v4 as uuid } from "uuid";
 
 class TimersDashboard extends React.Component {
+  state = {
+    timers: [
+      {
+        title: "Purchase sneakers",
+        project: "Shopping",
+        id: uuid(),
+        elapsed: 5456099,
+        runningSince: Date.now(),
+      },
+      {
+        title: "Ride a bike",
+        project: "Biking",
+        id: uuid(),
+        elapsed: 1273998,
+        runningSince: Date.now(),
+      },
+    ],
+  };
+  handleCreateFormSubmit = (timer) => {
+    this.createTimer(timer);
+  };
+
+  createTimer = (timer) => {
+    const t = window.helpers.newTimer(timer);
+    this.setState({
+      timers: this.state.timers.concat(t),
+    });
+  };
   render() {
     return (
       <section className="d-flex align-items-center pt-5 pt-md-5">
@@ -8,8 +37,8 @@ class TimersDashboard extends React.Component {
           <div className="row justify-content-center">
             <div className="col-12 col-md-6 col-lg-4">
               <h2 className="mb-5 text-center">Time Logging App</h2>
-              <EditableTimerList />
-              <ToggleableTimerForm isOpen={true} />
+              <EditableTimerList timers={this.state.timers} />
+              <ToggleableTimerForm onFormSubmit={this.handleCreateFormSubmit} />
             </div>
           </div>
         </div>
@@ -20,40 +49,41 @@ class TimersDashboard extends React.Component {
 
 class EditableTimerList extends React.Component {
   render() {
+    const timers = this.props.timers.map((timer) => (
+      <EditableTimer
+        key={timer.id}
+        id={timer.id}
+        title={timer.title}
+        project={timer.project}
+        elapsed={timer.elapsed}
+        runningSince={timer.runningSince}
+      />
+    ));
     return (
       <>
-        <EditableTimer
-          title="Learn to sing"
-          project="Singing"
-          elapsed="8986300"
-          runningSince={null}
-          editFormOpen={false}
-        />
-
-        <EditableTimer
-          title="Learn to drive"
-          project="Driving"
-          elapsed="3890985"
-          runningSince={null}
-          editFormOpen={true}
-        />
+        <div id="timers">{timers}</div>
       </>
     );
   }
 }
 
 class EditableTimer extends React.Component {
+  state = {
+    editFormOpen: false,
+  };
   render() {
     if (this.props.editFormOpen) {
-      return(
-      <Timer 
-        title={this.props.title} 
-        project={this.props.project} 
-      />
+      return (
+        <TimerForm
+          id={this.props.id}
+          title={this.props.title}
+          project={this.props.project}
+        />
       );
     } else {
       return (
-        <TimerForm
+        <Timer
+          id={this.props.id}
           title={this.props.title}
           project={this.props.project}
           elapsed={this.props.elapsed}
@@ -66,7 +96,9 @@ class EditableTimer extends React.Component {
 
 class Timer extends React.Component {
   render() {
-    const elapsedString = window.helpers.renderElapsedString(this.props.elapsed);
+    const elapsedString = window.helpers.renderElapsedString(
+      this.props.elapsed
+    );
     return (
       <>
         <div className="card mb-3">
@@ -133,8 +165,26 @@ class Timer extends React.Component {
 }
 
 class TimerForm extends React.Component {
+  state = {
+    title: this.props.title || "",
+    project: this.props.project || "",
+  };
+  handleTitleChange = (e) => {
+    this.setState({ title: e.target.value });
+  };
+  handleProjectChange = (e) => {
+    this.setState({ project: e.target.value });
+  };
+  handleSubmit = () => {
+    this.props.onFormSubmit({
+      id: this.props.id,
+      title: this.state.title,
+      project: this.state.project,
+    });
+  };
+
   render() {
-    const submitText = this.props.title ? "Update" : "Create";
+    const submitText = this.props.id ? "Update" : "Create";
     return (
       <>
         <div className="card mb-3">
@@ -147,8 +197,9 @@ class TimerForm extends React.Component {
                   </label>
                   <input
                     type="text"
+                    value={this.state.title}
                     className="form-control"
-                    defaultValue={this.props.title}
+                    onChange={this.handleTitleChange}
                   />
                 </div>
 
@@ -159,7 +210,7 @@ class TimerForm extends React.Component {
                   <input
                     type="text"
                     className="form-control"
-                    defaultValue={this.props.project}
+                    onChange={this.handleProjectChange}
                   />
                 </div>
               </div>
@@ -167,12 +218,18 @@ class TimerForm extends React.Component {
 
             <div className="row mb-3">
               <div className="col-6 mb-3">
-                <button className="btn btn-outline-primary btn-block">
+                <button
+                  className="btn btn-outline-primary btn-block"
+                  onClick={this.handleSubmit}
+                >
                   {submitText}
                 </button>
               </div>
               <div className="col-6 mb-3">
-                <button className="btn btn-outline-danger btn-block">
+                <button
+                  className="btn btn-outline-danger btn-block"
+                  onClick={this.props.onFormClose}
+                >
                   Cancel
                 </button>
               </div>
@@ -186,16 +243,37 @@ class TimerForm extends React.Component {
 }
 
 class ToggleableTimerForm extends React.Component {
+  state = {
+    isOpen: false,
+  };
+  handleFormOpen = () => {
+    this.setState({ isOpen: true });
+  };
+
+  handleFormClose = () => {
+    this.setState({ isOpen: false });
+  };
+
+  handleFormSubmit = (timer) => {
+    this.props.onFormSubmit(timer);
+    this.setState({ isOpen: false });
+  };
+
   render() {
-    if (this.props.isOpen) {
-      return <TimerForm />;
+    if (this.state.isOpen) {
+      return (
+        <TimerForm
+          onFormSubmit={this.handleFormSubmit}
+          onFormClose={this.handleFormClose}
+        />
+      );
     } else {
       return (
         <>
           <div className="mb-3">
-            <a
-              href="#action"
+            <button
               className="btn btn-block btn-white btn-outline-secondary"
+              onClick={this.handleFormOpen}
             >
               <svg
                 xmlns="http:www.w3.org/2000/svg"
@@ -211,7 +289,7 @@ class ToggleableTimerForm extends React.Component {
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                 />
               </svg>
-            </a>
+            </button>
           </div>
         </>
       );
