@@ -28,6 +28,10 @@ class TimersDashboard extends React.Component {
     this.updateTimer(attrs);
   };
 
+  handleTrashClick = (timerId) => {
+    this.deleteTimer(timerId);
+  };
+
   createTimer = (timer) => {
     const t = window.helpers.newTimer(timer);
     this.setState({
@@ -50,6 +54,12 @@ class TimersDashboard extends React.Component {
     });
   };
 
+  deleteTimer = (timerId) => {
+    this.setState({
+      timers: this.state.timers.filter((t) => t.id !== timerId),
+    });
+  };
+
   render() {
     <EditableTimerList
       timers={this.state.timers}
@@ -61,9 +71,10 @@ class TimersDashboard extends React.Component {
           <div className="row justify-content-center">
             <div className="col-12 col-md-6 col-lg-4">
               <h2 className="mb-5 text-center">Time Logging App</h2>
-              <EditableTimerList 
-                timers={this.state.timers} 
+              <EditableTimerList
+                timers={this.state.timers}
                 onFormSubmit={this.handleEditFormSubmit}
+                onTrashClick={this.handleTrashClick}
               />
               <ToggleableTimerForm onFormSubmit={this.handleCreateFormSubmit} />
             </div>
@@ -85,6 +96,7 @@ class EditableTimerList extends React.Component {
         elapsed={timer.elapsed}
         runningSince={timer.runningSince}
         onFormSubmit={this.props.onFormSubmit}
+        onTrashClick={this.props.onTrashClick}
       />
     ));
     return (
@@ -135,6 +147,7 @@ class EditableTimer extends React.Component {
           elapsed={this.props.elapsed}
           runningSince={this.props.runningSince}
           onEditClick={this.handleEditClick}
+          onTrashClick={this.props.onTrashClick}
         />
       );
     }
@@ -142,6 +155,9 @@ class EditableTimer extends React.Component {
 }
 
 class Timer extends React.Component {
+  handleTrashClick = () => {
+    this.props.onTrashClick(this.props.id);
+  };
   render() {
     const elapsedString = window.helpers.renderElapsedString(
       this.props.elapsed
@@ -163,7 +179,7 @@ class Timer extends React.Component {
 
             <div className="row justify-content-end mb-3">
               <div className="d-flex">
-                <button className="btn">
+                <button className="btn"  onClick={this.handleTrashClick}>
                   <svg
                     xmlns="http:www.w3.org/2000/svg"
                     fill="none"
@@ -201,7 +217,9 @@ class Timer extends React.Component {
 
             <div className="row mb-3">
               <div className="col-12">
-                <button className="btn btn-outline-primary btn-block">
+                <button
+                  className="btn btn-outline-primary btn-block"
+                >
                   Start
                 </button>
               </div>
