@@ -24,20 +24,47 @@ class TimersDashboard extends React.Component {
     this.createTimer(timer);
   };
 
+  handleEditFormSubmit = (attrs) => {
+    this.updateTimer(attrs);
+  };
+
   createTimer = (timer) => {
     const t = window.helpers.newTimer(timer);
     this.setState({
       timers: this.state.timers.concat(t),
     });
   };
+
+  updateTimer = (attrs) => {
+    this.setState({
+      timers: this.state.timers.map((timer) => {
+        if (timer.id === attrs.id) {
+          return Object.assign({}, timer, {
+            title: attrs.title,
+            project: attrs.project,
+          });
+        } else {
+          return timer;
+        }
+      }),
+    });
+  };
+
   render() {
+    <EditableTimerList
+      timers={this.state.timers}
+      onFormSubmit={this.handleEditFormSubmit}
+    />;
     return (
       <section className="d-flex align-items-center pt-5 pt-md-5">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-12 col-md-6 col-lg-4">
               <h2 className="mb-5 text-center">Time Logging App</h2>
-              <EditableTimerList timers={this.state.timers} />
+              <EditableTimerList 
+                timers={this.state.timers} 
+                onFormSubmit={this.handleEditFormSubmit}
+              />
               <ToggleableTimerForm onFormSubmit={this.handleCreateFormSubmit} />
             </div>
           </div>
@@ -57,6 +84,7 @@ class EditableTimerList extends React.Component {
         project={timer.project}
         elapsed={timer.elapsed}
         runningSince={timer.runningSince}
+        onFormSubmit={this.props.onFormSubmit}
       />
     ));
     return (
@@ -71,13 +99,31 @@ class EditableTimer extends React.Component {
   state = {
     editFormOpen: false,
   };
+  handleEditClick = () => {
+    this.openForm();
+  };
+  handleFormClose = () => {
+    this.closeForm();
+  };
+  handleSubmit = (timer) => {
+    this.props.onFormSubmit(timer);
+    this.closeForm();
+  };
+  closeForm = () => {
+    this.setState({ editFormOpen: false });
+  };
+  openForm = () => {
+    this.setState({ editFormOpen: true });
+  };
   render() {
-    if (this.props.editFormOpen) {
+    if (this.state.editFormOpen) {
       return (
         <TimerForm
           id={this.props.id}
           title={this.props.title}
           project={this.props.project}
+          onFormSubmit={this.handleSubmit}
+          onFormClose={this.handleFormClose}
         />
       );
     } else {
@@ -88,6 +134,7 @@ class EditableTimer extends React.Component {
           project={this.props.project}
           elapsed={this.props.elapsed}
           runningSince={this.props.runningSince}
+          onEditClick={this.handleEditClick}
         />
       );
     }
@@ -132,20 +179,23 @@ class Timer extends React.Component {
                     />
                   </svg>
                 </button>
-                <svg
-                  xmlns="http:www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="#0fcc98"
-                  width="26px"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
+
+                <button className="btn" onClick={this.props.onEditClick}>
+                  <svg
+                    xmlns="http:www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="#0fcc98"
+                    width="26px"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -210,6 +260,7 @@ class TimerForm extends React.Component {
                   <input
                     type="text"
                     className="form-control"
+                    value={this.state.project}
                     onChange={this.handleProjectChange}
                   />
                 </div>
