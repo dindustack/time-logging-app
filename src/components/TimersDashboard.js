@@ -93,7 +93,7 @@ class TimersDashboard extends React.Component {
           const lastElapsed = now - timer.runningSince;
           return Object.assign({}, timer, {
             elapsed: timer.elapsed + lastElapsed,
-            runningSince: now,
+            runningSince: null,
           });
         } else {
           return timer;
@@ -462,3 +462,4 @@ class ToggleableTimerForm extends React.Component {
 }
 
 export default TimersDashboard;
+
