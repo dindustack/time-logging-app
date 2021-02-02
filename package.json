@@ -1,5 +1,5 @@
 {
-  "name": "voting-application",
+  "name": "time-logging",
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:5500",
